@@ -2,16 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { categories } from "@/lib/mock-data";
+import type { Category } from "@/lib/types";
 
-const navItems = [
-  { label: "सभी", href: "/" },
-  ...categories.map((c) => ({ label: c.name, href: `/${c.slug}` })),
-  { label: "वीडियो", href: "/video" },
-];
+interface CategoryNavProps {
+  categories: Category[];
+}
 
-export function CategoryNav() {
+export function CategoryNav({ categories }: CategoryNavProps) {
   const pathname = usePathname();
+
+  const navItems = [
+    { label: "सभी", href: "/" },
+    ...categories.map((c) => ({ label: c.name, href: `/${c.slug}` })),
+    { label: "वीडियो", href: "/video" },
+  ];
 
   return (
     <div className="border-b border-[var(--border)] bg-[var(--background)]">

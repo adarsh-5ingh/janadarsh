@@ -1,16 +1,15 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Clock } from "lucide-react";
-import { getLatestArticles } from "@/lib/mock-data";
+import { ArticleImage } from "@/components/ui/ArticleImage";
+import { getLatestArticles } from "@/lib/queries";
 import { formatRelativeTime } from "@/lib/utils";
 
-export function LatestBar() {
-  const latest = getLatestArticles(3);
+export async function LatestBar() {
+  const latest = await getLatestArticles(3);
 
   return (
     <div className="border-b border-[var(--border)] bg-[var(--background)]">
       <div className="max-w-7xl mx-auto px-4 pt-3 pb-3">
-        {/* Top row: label + view all */}
         <div className="flex items-center justify-between mb-2.5">
           <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--muted-foreground)]">
             ताज़ा खबर
@@ -23,18 +22,17 @@ export function LatestBar() {
           </Link>
         </div>
 
-        {/* Cards row */}
         <div className="flex items-center divide-x divide-[var(--border)] overflow-hidden">
           {latest.map((article, i) => {
             const href = `/${article.category.slug}/${article.slug}`;
             return (
               <Link
-                key={article.id}
+                key={article._id}
                 href={href}
                 className={`group flex items-center gap-3 px-4 first:pl-0 min-w-0 flex-1 hover:text-[var(--accent)] transition-colors ${i > 0 ? "hidden sm:flex" : ""}`}
               >
                 <div className="relative w-20 h-16 rounded-lg overflow-hidden shrink-0">
-                  <Image
+                  <ArticleImage
                     src={article.featuredImage}
                     alt={article.title}
                     fill

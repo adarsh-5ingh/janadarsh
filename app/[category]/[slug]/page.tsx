@@ -1,15 +1,15 @@
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight, Clock, Eye, User } from "lucide-react";
+import { PortableText } from "@portabletext/react";
 import { ShareButtons } from "@/components/articles/ShareButtons";
 import { ArticleCard } from "@/components/articles/ArticleCard";
+import { ArticleImage } from "@/components/ui/ArticleImage";
 import {
-  articles,
-  categories,
   getArticleBySlug,
   getArticlesByCategory,
-} from "@/lib/mock-data";
+  getAllArticleSlugs,
+} from "@/lib/queries";
 import { formatRelativeTime, estimateReadTime } from "@/lib/utils";
 
 interface ArticlePageProps {
@@ -18,11 +18,13 @@ interface ArticlePageProps {
 
 export default async function ArticlePage({ params }: ArticlePageProps) {
   const { category: catSlug, slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = await getArticleBySlug(slug);
   if (!article || article.category.slug !== catSlug) notFound();
 
-  const related = getArticlesByCategory(catSlug, 4).filter((a) => a.id !== article.id).slice(0, 3);
+  const allInCategory = await getArticlesByCategory(catSlug, 5);
+  const related = allInCategory.filter((a) => a._id !== article._id).slice(0, 3);
   const articleUrl = `https://janadarsh.com/${catSlug}/${slug}`;
+  const authorName = typeof article.author === "string" ? article.author : "संपादक";
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -67,7 +69,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
           <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-[var(--muted-foreground)]">
             <span className="flex items-center gap-1.5">
               <User className="w-4 h-4" />
-              {article.author}
+              {authorName}
             </span>
             <span className="flex items-center gap-1.5" suppressHydrationWarning>
               <Clock className="w-4 h-4" />
@@ -77,7 +79,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               <Eye className="w-4 h-4" />
               {article.viewCount.toLocaleString("hi-IN")} बार पढ़ा
             </span>
-            <span className="text-xs">{estimateReadTime(article.content)}</span>
+            <span className="text-xs">{estimateReadTime(article.summary)}</span>
           </div>
 
           {/* Share buttons (top) */}
@@ -87,7 +89,7 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
           {/* Featured image */}
           <div className="relative aspect-video w-full rounded-xl overflow-hidden mt-6">
-            <Image
+            <ArticleImage
               src={article.featuredImage}
               alt={article.title}
               fill
@@ -99,15 +101,35 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
           {/* Article body */}
           <div className="mt-6 prose prose-lg max-w-none text-[var(--foreground)] leading-relaxed space-y-4">
-            {article.content.split("\n\n").map((para, i) => (
-              <p key={i} className="text-base sm:text-lg leading-9">
-                {para}
-              </p>
-            ))}
+            {article.body && article.body.length > 0 ? (
+              <PortableText
+                value={article.body}
+                components={{
+                  block: {
+                    normal: ({ children }) => (
+                      <p className="text-base sm:text-lg leading-9">{children}</p>
+                    ),
+                    h2: ({ children }) => (
+                      <h2 className="text-xl font-bold mt-6 mb-2">{children}</h2>
+                    ),
+                    h3: ({ children }) => (
+                      <h3 className="text-lg font-bold mt-4 mb-2">{children}</h3>
+                    ),
+                    blockquote: ({ children }) => (
+                      <blockquote className="border-l-4 border-[var(--accent)] pl-4 italic text-[var(--muted-foreground)]">
+                        {children}
+                      </blockquote>
+                    ),
+                  },
+                }}
+              />
+            ) : (
+              <p className="text-base sm:text-lg leading-9">{article.summary}</p>
+            )}
           </div>
 
           {/* Tags */}
-          {article.tags.length > 0 && (
+          {article.tags && article.tags.length > 0 && (
             <div className="mt-8 flex flex-wrap gap-2">
               {article.tags.map((tag) => (
                 <span
@@ -131,7 +153,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 
         {/* Sidebar */}
         <aside className="space-y-8">
-          {/* Related from same category */}
           {related.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-4">
@@ -140,13 +161,12 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
               </div>
               <div className="space-y-4">
                 {related.map((a) => (
-                  <ArticleCard key={a.id} article={a} size="small" />
+                  <ArticleCard key={a._id} article={a} size="small" />
                 ))}
               </div>
             </div>
           )}
 
-          {/* Ad placeholder */}
           <div className="w-full h-64 bg-[var(--muted)] rounded-xl border border-dashed border-[var(--border)] flex items-center justify-center">
             <span className="text-xs text-[var(--muted-foreground)]">विज्ञापन (300×250)</span>
           </div>
@@ -157,8 +177,6 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 }
 
 export async function generateStaticParams() {
-  return articles.map((a) => ({
-    category: a.category.slug,
-    slug: a.slug,
-  }));
+  const slugs = await getAllArticleSlugs();
+  return slugs.map(({ category, slug }) => ({ category, slug }));
 }

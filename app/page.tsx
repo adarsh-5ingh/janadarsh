@@ -4,7 +4,7 @@ import { TrendingSection } from "@/components/homepage/TrendingSection";
 import { LatestNews } from "@/components/homepage/LatestNews";
 import { CategorySection } from "@/components/homepage/CategorySection";
 import { VideoPreview } from "@/components/homepage/VideoPreview";
-import { categories } from "@/lib/mock-data";
+import { getCategories, getFeaturedArticles, getLatestArticles } from "@/lib/queries";
 
 function AdBanner({ label = "विज्ञापन" }: { label?: string }) {
   return (
@@ -16,16 +16,35 @@ function AdBanner({ label = "विज्ञापन" }: { label?: string }) {
   );
 }
 
-const homepageCategories = [
-  [categories[0], categories[1]], // बैतूल + राज्य
-  [categories[4], categories[5]], // खेल + संस्कृति
-];
+export default async function HomePage() {
+  const [featured, latest, categories] = await Promise.all([
+    getFeaturedArticles(),
+    getLatestArticles(8),
+    getCategories(),
+  ]);
 
-export default function HomePage() {
+  const heroArticles = (() => {
+    const seen = new Set<string>();
+    const pool = [];
+    for (const a of [...featured, ...latest]) {
+      if (!seen.has(a._id)) {
+        seen.add(a._id);
+        pool.push(a);
+      }
+    }
+    return pool;
+  })();
+
+  const homepageCategories = categories.length >= 6
+    ? [[categories[0], categories[1]], [categories[4], categories[5]]]
+    : categories.length >= 2
+    ? [[categories[0], categories[1]]]
+    : [];
+
   return (
     <div className="pb-8">
       <LatestBar />
-      <HeroSection />
+      <HeroSection articles={heroArticles} />
       <TrendingSection />
       <AdBanner />
       <LatestNews />
@@ -36,7 +55,7 @@ export default function HomePage() {
         <section key={i} className="max-w-7xl mx-auto px-4 py-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {pair.map((cat) => (
-              <CategorySection key={cat.id} category={cat} limit={4} />
+              <CategorySection key={cat._id} category={cat} limit={4} />
             ))}
           </div>
         </section>

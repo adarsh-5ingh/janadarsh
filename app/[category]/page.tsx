@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { ArticleCard } from "@/components/articles/ArticleCard";
-import { categories, getArticlesByCategory } from "@/lib/mock-data";
+import { getCategories, getArticlesByCategory, getAllCategorySlugs } from "@/lib/queries";
 
 interface CategoryPageProps {
   params: Promise<{ category: string }>;
@@ -8,14 +8,14 @@ interface CategoryPageProps {
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category: slug } = await params;
+  const categories = await getCategories();
   const category = categories.find((c) => c.slug === slug);
   if (!category) notFound();
 
-  const articles = getArticlesByCategory(slug);
+  const articles = await getArticlesByCategory(slug);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      {/* Page header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-1.5 h-8 rounded-full" style={{ backgroundColor: category.color }} />
@@ -33,12 +33,11 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {articles.map((article) => (
-            <ArticleCard key={article.id} article={article} size="medium" />
+            <ArticleCard key={article._id} article={article} size="medium" />
           ))}
         </div>
       )}
 
-      {/* Pagination placeholder */}
       {articles.length > 0 && (
         <div className="flex justify-center gap-2 mt-10">
           {[1, 2, 3].map((n) => (
@@ -60,5 +59,6 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 }
 
 export async function generateStaticParams() {
-  return categories.map((c) => ({ category: c.slug }));
+  const slugs = await getAllCategorySlugs();
+  return slugs.map((slug) => ({ category: slug }));
 }

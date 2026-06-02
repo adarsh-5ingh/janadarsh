@@ -12,8 +12,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "picsum.photos",
       },
-      // Add Cloudinary here later when backend is set up
-      // { protocol: "https", hostname: "res.cloudinary.com" },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
     ],
   },
 };

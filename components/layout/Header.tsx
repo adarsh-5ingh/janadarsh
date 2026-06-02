@@ -5,9 +5,13 @@ import { useState } from "react";
 import { Search, Sun, Moon, Menu, X } from "lucide-react";
 import { useTheme } from "@/components/ui/ThemeProvider";
 import { CategoryNav } from "@/components/layout/CategoryNav";
+import type { Category } from "@/lib/types";
 
+interface HeaderProps {
+  categories: Category[];
+}
 
-export function Header() {
+export function Header({ categories }: HeaderProps) {
   const { theme, toggle } = useTheme();
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -74,7 +78,7 @@ export function Header() {
       </div>
 
       {/* Row 3 — category pills */}
-      <CategoryNav />
+      <CategoryNav categories={categories} />
 
       {/* Mobile menu overlay */}
       {menuOpen && (

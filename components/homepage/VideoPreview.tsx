@@ -1,11 +1,11 @@
 import Link from "next/link";
-import Image from "next/image";
 import { ChevronRight, Play } from "lucide-react";
-import { videos } from "@/lib/mock-data";
+import { ArticleImage } from "@/components/ui/ArticleImage";
+import { getVideos } from "@/lib/queries";
 import { formatRelativeTime } from "@/lib/utils";
 
-export function VideoPreview() {
-  const preview = videos.slice(0, 3);
+export async function VideoPreview() {
+  const videos = await getVideos(3);
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-6">
@@ -23,27 +23,25 @@ export function VideoPreview() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {preview.map((video) => (
+        {videos.map((video) => (
           <Link
-            key={video.id}
-            href={`/video`}
+            key={video._id}
+            href="/video"
             className="group block bg-[var(--card)] rounded-xl overflow-hidden border border-[var(--border)] hover:shadow-md transition-shadow"
           >
             <div className="relative aspect-video overflow-hidden">
-              <Image
+              <ArticleImage
                 src={video.thumbnail}
                 alt={video.title}
                 fill
                 className="object-cover transition-transform duration-400 group-hover:scale-105"
                 sizes="(max-width: 640px) 100vw, 33vw"
               />
-              {/* Play button overlay */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="w-12 h-12 rounded-full bg-black/60 flex items-center justify-center group-hover:bg-[var(--accent)] transition-colors">
                   <Play className="w-5 h-5 text-white ml-0.5" fill="white" />
                 </div>
               </div>
-              {/* Duration */}
               <span className="absolute bottom-2 right-2 bg-black/80 text-white text-xs px-1.5 py-0.5 rounded font-mono">
                 {video.duration}
               </span>

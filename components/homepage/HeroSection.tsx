@@ -2,40 +2,26 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react"; // kept for desktop arrows
-import { getFeaturedArticles, getLatestArticles } from "@/lib/mock-data";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ArticleImage } from "@/components/ui/ArticleImage";
 import { formatRelativeTime } from "@/lib/utils";
-import type { Article } from "@/lib/mock-data";
+import type { Article } from "@/lib/types";
 
-// Build pool once outside component — stable reference
-function buildPool(): Article[] {
-  const featured = getFeaturedArticles();
-  const latest = getLatestArticles(8);
-  const seen = new Set<string>();
-  const pool: Article[] = [];
-  for (const a of [...featured, ...latest]) {
-    if (!seen.has(a.id)) {
-      seen.add(a.id);
-      pool.push(a);
-    }
-  }
-  return pool;
+interface HeroSectionProps {
+  articles: Article[];
 }
 
-const pool = buildPool();
-
-export function HeroSection() {
+export function HeroSection({ articles: pool }: HeroSectionProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const pausedRef = useRef(false);
 
   const prev = useCallback(() => {
     setCurrentIndex((i) => (i - 1 + pool.length) % pool.length);
-  }, []);
+  }, [pool.length]);
 
   const next = useCallback(() => {
     setCurrentIndex((i) => (i + 1) % pool.length);
-  }, []);
+  }, [pool.length]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -44,7 +30,9 @@ export function HeroSection() {
       }
     }, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [pool.length]);
+
+  if (pool.length === 0) return null;
 
   const active = pool[currentIndex];
   const queue = pool.filter((_, i) => i !== currentIndex);
@@ -52,7 +40,6 @@ export function HeroSection() {
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-5">
-      {/* Section heading */}
       <div className="flex items-center gap-2 mb-4">
         <div className="w-1 h-5 bg-[var(--accent)] rounded-full" />
         <h2 className="text-xs font-bold uppercase tracking-widest text-[var(--foreground)]">
@@ -60,15 +47,13 @@ export function HeroSection() {
         </h2>
       </div>
 
-      {/* Slider container */}
       <div
         className="relative rounded-xl overflow-hidden h-[300px] sm:h-[400px] lg:h-[520px]"
         onMouseEnter={() => { pausedRef.current = true; }}
         onMouseLeave={() => { pausedRef.current = false; }}
       >
-        {/* Hero image — fades in on each change */}
-        <Image
-          key={active.id}
+        <ArticleImage
+          key={active._id}
           src={active.featuredImage}
           alt={active.title}
           fill
@@ -77,10 +62,8 @@ export function HeroSection() {
           sizes="(max-width: 1024px) 100vw, 1280px"
         />
 
-        {/* Subtle scrim */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent" />
 
-        {/* Breaking badge */}
         {active.isBreaking && (
           <span className="absolute top-3 left-3 z-20 inline-flex items-center gap-1 text-[11px] font-bold text-white bg-[var(--accent)] px-2 py-0.5 rounded-full">
             <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
@@ -88,7 +71,6 @@ export function HeroSection() {
           </span>
         )}
 
-        {/* Prev / Next arrows — desktop only */}
         <button
           onClick={prev}
           aria-label="पिछला"
@@ -105,7 +87,6 @@ export function HeroSection() {
           <ChevronRight className="w-5 h-5" />
         </button>
 
-        {/* Content box — white card bottom-left */}
         <Link
           href={activeHref}
           className="group absolute bottom-4 left-4 lg:bottom-8 lg:left-6 z-20 bg-white/90 dark:bg-black/80 rounded-2xl p-4 lg:p-6 max-w-[85%] lg:max-w-[56%] backdrop-blur-md"
@@ -123,31 +104,26 @@ export function HeroSection() {
           </h1>
         </Link>
 
-
-        {/* Right scrollable panel */}
         <div className="absolute top-0 right-0 bottom-0 w-[34%] bg-black/85 backdrop-blur-md hidden lg:flex flex-col border-l border-white/5">
-          {/* Panel header */}
           <div className="px-4 pt-5 pb-4 shrink-0">
             <h3 className="text-lg font-bold text-white tracking-tight leading-tight">
               और खबरें
             </h3>
           </div>
 
-          {/* Scrollable list */}
           <div className="flex-1 overflow-y-auto scrollbar-thin">
             {queue.map((article, i) => {
               const isFirst = i === 0;
               return (
                 <button
-                  key={article.id}
+                  key={article._id}
                   onClick={() => setCurrentIndex(pool.indexOf(article))}
                   className="w-full text-left group hover:bg-white/5 transition-colors"
                 >
                   {isFirst ? (
-                    /* First item — image card */
                     <div className="px-3 pt-3 pb-3">
                       <div className="relative rounded-lg overflow-hidden h-[120px] w-full mb-2.5">
-                        <Image
+                        <ArticleImage
                           src={article.featuredImage}
                           alt={article.title}
                           fill
@@ -166,7 +142,6 @@ export function HeroSection() {
                       </p>
                     </div>
                   ) : (
-                    /* Items 2+ — large number, no thumbnail */
                     <div className="flex gap-3 px-3 py-5">
                       <span className="text-4xl font-black text-white/15 group-hover:text-[var(--accent)] transition-colors shrink-0 leading-none w-9 tabular-nums">
                         {i + 2}

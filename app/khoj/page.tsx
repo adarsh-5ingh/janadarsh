@@ -4,8 +4,14 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import { ArticleCard } from "@/components/articles/ArticleCard";
-import { searchArticles, type Article } from "@/lib/mock-data";
 import { Suspense } from "react";
+import type { Article } from "@/lib/types";
+
+async function fetchSearchResults(query: string): Promise<Article[]> {
+  const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+  if (!res.ok) return [];
+  return res.json();
+}
 
 function SearchResults() {
   const searchParams = useSearchParams();
@@ -20,8 +26,9 @@ function SearchResults() {
       setSearched(false);
       return;
     }
-    const timer = setTimeout(() => {
-      setResults(searchArticles(query));
+    const timer = setTimeout(async () => {
+      const data = await fetchSearchResults(query);
+      setResults(data);
       setSearched(true);
     }, 300);
     return () => clearTimeout(timer);
@@ -31,7 +38,6 @@ function SearchResults() {
     <div className="max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold text-[var(--foreground)] mb-6">खबर खोजें</h1>
 
-      {/* Search input */}
       <div className="relative mb-8">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--muted-foreground)]" />
         <input
@@ -44,7 +50,6 @@ function SearchResults() {
         />
       </div>
 
-      {/* Results */}
       {searched && (
         <div>
           <p className="text-sm text-[var(--muted-foreground)] mb-4">
@@ -58,7 +63,7 @@ function SearchResults() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {results.map((article) => (
-                <ArticleCard key={article.id} article={article} size="medium" />
+                <ArticleCard key={article._id} article={article} size="medium" />
               ))}
             </div>
           )}

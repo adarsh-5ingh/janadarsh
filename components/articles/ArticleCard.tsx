@@ -1,7 +1,7 @@
 import Link from "next/link";
-import Image from "next/image";
 import { cn, formatRelativeTime, estimateReadTime } from "@/lib/utils";
-import type { Article } from "@/lib/mock-data";
+import { ArticleImage } from "@/components/ui/ArticleImage";
+import type { Article } from "@/lib/types";
 
 type Size = "small" | "medium" | "large";
 
@@ -32,13 +32,14 @@ function AuthorAvatar({ name, size = "sm" }: { name: string; size?: "sm" | "xs" 
 
 export function ArticleCard({ article, size = "medium", className }: ArticleCardProps) {
   const href = `/${article.category.slug}/${article.slug}`;
+  const authorName = typeof article.author === "string" ? article.author : "संपादक";
 
   // ── LARGE ──────────────────────────────────────────────────────────────────
   if (size === "large") {
     return (
       <Link href={href} className={cn("group block bg-[var(--card)] rounded-xl overflow-hidden", className)}>
         <div className="relative aspect-[16/10] w-full overflow-hidden">
-          <Image
+          <ArticleImage
             src={article.featuredImage}
             alt={article.title}
             fill
@@ -60,8 +61,8 @@ export function ArticleCard({ article, size = "medium", className }: ArticleCard
             {article.title}
           </h2>
           <div className="mt-2 flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
-            <AuthorAvatar name={article.author} size="xs" />
-            <span>{article.author}</span>
+            <AuthorAvatar name={authorName} size="xs" />
+            <span>{authorName}</span>
             <span>·</span>
             <span suppressHydrationWarning>{formatRelativeTime(article.publishedAt)}</span>
           </div>
@@ -75,7 +76,7 @@ export function ArticleCard({ article, size = "medium", className }: ArticleCard
     return (
       <Link href={href} className={cn("group flex gap-3 items-center", className)}>
         <div className="relative w-20 h-16 rounded-lg overflow-hidden shrink-0">
-          <Image
+          <ArticleImage
             src={article.featuredImage}
             alt={article.title}
             fill
@@ -91,7 +92,7 @@ export function ArticleCard({ article, size = "medium", className }: ArticleCard
             {article.title}
           </h3>
           <p className="mt-1 text-xs text-[var(--muted-foreground)]" suppressHydrationWarning>
-            {article.author} · {formatRelativeTime(article.publishedAt)}
+            {authorName} · {formatRelativeTime(article.publishedAt)}
           </p>
         </div>
       </Link>
@@ -108,7 +109,7 @@ export function ArticleCard({ article, size = "medium", className }: ArticleCard
       )}
     >
       <div className="relative aspect-[16/10] w-full overflow-hidden">
-        <Image
+        <ArticleImage
           src={article.featuredImage}
           alt={article.title}
           fill
@@ -133,9 +134,11 @@ export function ArticleCard({ article, size = "medium", className }: ArticleCard
           {article.summary}
         </p>
         <div className="mt-3 flex items-center gap-2 text-xs text-[var(--muted-foreground)]">
-          <AuthorAvatar name={article.author} size="sm" />
-          <span className="font-medium">{article.author}</span>
-          <span className="ml-auto" suppressHydrationWarning>{estimateReadTime(article.content)} · {formatRelativeTime(article.publishedAt)}</span>
+          <AuthorAvatar name={authorName} size="sm" />
+          <span className="font-medium">{authorName}</span>
+          <span className="ml-auto" suppressHydrationWarning>
+            {estimateReadTime(article.summary)} · {formatRelativeTime(article.publishedAt)}
+          </span>
         </div>
       </div>
     </Link>

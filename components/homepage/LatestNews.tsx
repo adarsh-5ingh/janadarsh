@@ -1,17 +1,17 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { ArticleCard } from "@/components/articles/ArticleCard";
-import { getLatestArticles } from "@/lib/mock-data";
+import { getLatestArticles } from "@/lib/queries";
 
-export function LatestNews() {
-  const articles = getLatestArticles(8);
+export async function LatestNews() {
+  const articles = await getLatestArticles(8);
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-6">
       <SectionHeader title="ताजा खबरें" href="/samachar" />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
         {articles.map((article) => (
-          <ArticleCard key={article.id} article={article} size="medium" />
+          <ArticleCard key={article._id} article={article} size="medium" />
         ))}
       </div>
     </section>

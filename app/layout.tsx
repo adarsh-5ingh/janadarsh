@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/ui/ThemeProvider";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { BreakingNewsTicker } from "@/components/layout/BreakingNewsTicker";
+import { getCategories } from "@/lib/queries";
 import "./globals.css";
 
 const inter = Inter({
@@ -26,18 +27,20 @@ export const metadata: Metadata = {
   keywords: ["बैतूल", "मध्य प्रदेश", "हिंदी समाचार", "Betul news", "MP news"],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const categories = await getCategories();
+
   return (
     <html lang="hi" suppressHydrationWarning>
       <body
         className={`${notoDevanagari.variable} ${inter.variable} antialiased bg-[var(--background)] text-[var(--foreground)]`}
       >
         <ThemeProvider>
-          <Header />
+          <Header categories={categories} />
           <BreakingNewsTicker />
           <main className="min-h-screen">{children}</main>
           <Footer />

@@ -1,16 +1,13 @@
 import Link from "next/link";
 import { TrendingUp, Eye } from "lucide-react";
-import { getLatestArticles } from "@/lib/mock-data";
+import { getTrendingArticles } from "@/lib/queries";
 import { formatRelativeTime } from "@/lib/utils";
 
-export function TrendingSection() {
-  const trending = [...getLatestArticles(10)]
-    .sort((a, b) => b.viewCount - a.viewCount)
-    .slice(0, 5);
+export async function TrendingSection() {
+  const trending = await getTrendingArticles(5);
 
   return (
     <section className="max-w-7xl mx-auto px-4 py-4">
-      {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <div className="w-1 h-5 bg-[var(--accent)] rounded-full" />
         <TrendingUp className="w-4 h-4" style={{ color: "var(--accent)" }} />
@@ -19,19 +16,17 @@ export function TrendingSection() {
         </h2>
       </div>
 
-      {/* 5 rank cards */}
       <div className="grid grid-cols-1 sm:grid-cols-5 gap-px bg-[var(--border)] rounded-xl overflow-hidden border border-[var(--border)]">
         {trending.map((article, i) => {
           const href = `/${article.category.slug}/${article.slug}`;
           const isTop = i === 0;
           return (
             <Link
-              key={article.id}
+              key={article._id}
               href={href}
               className={`group flex flex-col gap-3 p-4 bg-[var(--card)] hover:bg-[var(--muted)] transition-colors ${isTop ? "border-t-2" : ""}`}
               style={isTop ? { borderTopColor: "var(--accent)" } : {}}
             >
-              {/* Rank + readers */}
               <div className="flex items-start justify-between">
                 <span
                   className="text-5xl font-black leading-none tabular-nums"
@@ -45,7 +40,6 @@ export function TrendingSection() {
                 </span>
               </div>
 
-              {/* Category + title */}
               <div className="flex-1">
                 <span className="text-[10px] font-bold uppercase tracking-wide block mb-1" style={{ color: "var(--accent)" }}>
                   {article.category.name}
@@ -55,7 +49,6 @@ export function TrendingSection() {
                 </p>
               </div>
 
-              {/* Time */}
               <span className="text-[11px] text-[var(--muted-foreground)]" suppressHydrationWarning>
                 {formatRelativeTime(article.publishedAt)}
               </span>
