@@ -89,7 +89,7 @@ export function HeroSection({ articles: pool }: HeroSectionProps) {
 
         <Link
           href={activeHref}
-          className="group absolute bottom-4 left-4 lg:bottom-8 lg:left-6 z-20 bg-white/90 dark:bg-black/80 rounded-2xl p-4 lg:p-6 max-w-[85%] lg:max-w-[56%] backdrop-blur-md"
+          className="group absolute bottom-4 left-4 lg:bottom-8 lg:left-6 z-20 bg-white/90 rounded-2xl p-4 lg:p-6 max-w-[85%] lg:max-w-[56%] backdrop-blur-md"
         >
           <div className="flex items-center gap-2 mb-2">
             <span className="inline-block bg-[var(--accent)] text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full">
@@ -99,7 +99,7 @@ export function HeroSection({ articles: pool }: HeroSectionProps) {
               {formatRelativeTime(active.publishedAt)}
             </span>
           </div>
-          <h1 className="text-lg sm:text-xl lg:text-2xl font-extrabold leading-snug line-clamp-3 text-white group-hover:text-[var(--accent)] transition-colors">
+          <h1 className="text-lg sm:text-xl lg:text-2xl font-extrabold leading-snug line-clamp-3 text-gray-900 group-hover:text-[var(--accent)] transition-colors">
             {active.title}
           </h1>
         </Link>

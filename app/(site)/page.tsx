@@ -23,17 +23,7 @@ export default async function HomePage() {
     getCategories(),
   ]);
 
-  const heroArticles = (() => {
-    const seen = new Set<string>();
-    const pool = [];
-    for (const a of [...featured, ...latest]) {
-      if (!seen.has(a._id)) {
-        seen.add(a._id);
-        pool.push(a);
-      }
-    }
-    return pool;
-  })();
+  const heroArticles = featured;
 
   const homepageCategories = categories.length >= 6
     ? [[categories[0], categories[1]], [categories[4], categories[5]]]
